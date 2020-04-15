@@ -209,6 +209,7 @@ export class HQSplatRenderer{
 
 				attributeMaterial.elevationGradientRepeat = material.elevationGradientRepeat;
 				attributeMaterial.elevationRange = material.elevationRange;
+				attributeMaterial.heightAboveGroundRange = material.heightAboveGroundRange;
 				attributeMaterial.gradient = material.gradient;
 				attributeMaterial.matcap = material.matcap;
 
@@ -228,6 +229,7 @@ export class HQSplatRenderer{
 				attributeMaterial.weightClassification = material.weightClassification;
 				attributeMaterial.weightReturnNumber = material.weightReturnNumber;
 				attributeMaterial.weightSourceID = material.weightSourceID;
+				attributeMaterial.weightHeightAboveGround = material.weightHeightAboveGround;
 
 				attributeMaterial.color = material.color;
 

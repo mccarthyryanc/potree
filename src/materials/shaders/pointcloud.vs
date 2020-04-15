@@ -12,6 +12,7 @@ attribute float classification;
 attribute float returnNumber;
 attribute float numberOfReturns;
 attribute float pointSourceID;
+attribute float heightAboveGround;
 attribute vec4 indices;
 attribute float spacing;
 attribute float gpsTime;
@@ -78,6 +79,7 @@ uniform vec3 uColor;
 uniform float uOpacity;
 
 uniform vec2 elevationRange;
+uniform vec2 heightAboveGroundRange;
 uniform vec2 intensityRange;
 
 uniform vec2 uFilterReturnNumberRange;
@@ -100,6 +102,7 @@ uniform float wElevation;
 uniform float wClassification;
 uniform float wReturnNumber;
 uniform float wSourceID;
+uniform float wHeightAboveGround;
 
 uniform vec2 uExtraNormalizedRange;
 uniform vec2 uExtraRange;
@@ -436,6 +439,13 @@ vec3 getElevation(){
 	return cElevation;
 }
 
+vec3 getHeightAboveGround(){
+	float w = (heightAboveGround - heightAboveGroundRange.x) / (heightAboveGroundRange.y - heightAboveGroundRange.x);
+	vec3 cHeightAboveGround = texture2D(gradient, vec2(w,1.0-w)).rgb;
+	
+	return cHeightAboveGround;
+}
+
 vec4 getClassification(){
 	vec2 uv = vec2(classification / 255.0, 0.5);
 	vec4 classColor = texture2D(classificationLUT, uv);
@@ -484,6 +494,9 @@ vec3 getCompositeColor(){
 	
 	c += wElevation * getElevation();
 	w += wElevation;
+
+	c += wHeightAboveGround * getHeightAboveGround();
+	w += wHeightAboveGround;
 	
 	c += wReturnNumber * getReturnNumber();
 	w += wReturnNumber;
@@ -567,6 +580,8 @@ vec3 getColor(){
 	#elif defined color_type_rgb_height
 		vec3 cHeight = getElevation();
 		color = (1.0 - uTransition) * getRGB() + uTransition * cHeight;
+	#elif defined color_type_height_above_ground
+		color = getHeightAboveGround();
 	#elif defined color_type_depth
 		float linearDepth = gl_Position.w;
 		float expDepth = (gl_Position.z / gl_Position.w) * 0.5 + 0.5;

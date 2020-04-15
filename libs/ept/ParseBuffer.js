@@ -50,11 +50,13 @@ function parseEpt(event) {
 	let numPoints = buffer.byteLength / pointSize;
 
 	let xyzBuffer, rgbBuffer, intensityBuffer, classificationBuffer,
-		returnNumberBuffer, numberOfReturnsBuffer, pointSourceIdBuffer;
+		returnNumberBuffer, numberOfReturnsBuffer, pointSourceIdBuffer,
+		heightAboveGroundBuffer;
 	let xyz, rgb, intensity, classification, returnNumber, numberOfReturns,
-		pointSourceId;
+		pointSourceId, heightAboveGround;
 	let xyzExtractor, rgbExtractor, intensityExtractor, classificationExtractor,
-		returnNumberExtractor, numberOfReturnsExtractor, pointSourceIdExtractor;
+		returnNumberExtractor, numberOfReturnsExtractor, pointSourceIdExtractor,
+		heightAboveGroundExtractor;
 	let twoByteColor = false;
 
 	if (dimensions['X'] && dimensions['Y'] && dimensions['Z']) {
@@ -116,6 +118,12 @@ function parseEpt(event) {
 		pointSourceIdExtractor = getExtractor('PointSourceId');
 	}
 
+	if (dimensions['HeightAboveGround']) {
+		heightAboveGroundBuffer = new ArrayBuffer(numPoints * 4);
+		heightAboveGround = new Float32Array(heightAboveGroundBuffer);
+		heightAboveGroundExtractor = getExtractor('HeightAboveGround');
+	}
+
 	let mean = [0, 0, 0];
 	let bounds = {
 		min: [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE],
@@ -168,6 +176,7 @@ function parseEpt(event) {
 		if (returnNumber) returnNumber[i] = returnNumberExtractor(pos);
 		if (numberOfReturns) numberOfReturns[i] = numberOfReturnsExtractor(pos);
 		if (pointSourceId) pointSourceId[i] = pointSourceIdExtractor(pos);
+		if (heightAboveGround) heightAboveGround[i] = heightAboveGroundExtractor(pos);
 	}
 
 	let indicesBuffer = new ArrayBuffer(numPoints * 4);
@@ -188,6 +197,7 @@ function parseEpt(event) {
 		returnNumber: returnNumberBuffer,
 		numberOfReturns: numberOfReturnsBuffer,
 		pointSourceId: pointSourceIdBuffer,
+		heightAboveGround: heightAboveGroundBuffer,
 		indices: indicesBuffer
 	};
 
@@ -199,6 +209,7 @@ function parseEpt(event) {
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceId,
+		message.heightAboveGround,
 		message.indices
 	].filter((v) => v);
 

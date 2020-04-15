@@ -137,6 +137,7 @@ export class PropertiesPanel{
 					<li>Classification: <span id="lblWeightClassification"></span> <div id="sldWeightClassification"></div>	</li>
 					<li>Return Number: <span id="lblWeightReturnNumber"></span> <div id="sldWeightReturnNumber"></div>	</li>
 					<li>Source ID: <span id="lblWeightSourceID"></span> <div id="sldWeightSourceID"></div>	</li>
+					<li>Height Above Ground: <span id="lblWeightHeightAboveGround"></span> <div id="sldWeightHeightAboveGround"></div>	</li>
 				</div>
 
 				<div id="materials.rgb_container">
@@ -232,6 +233,20 @@ export class PropertiesPanel{
 					<div class="divider">
 						<span>Indices</span>
 					</div>
+				</div>
+
+				<div id="materials.heightaboveground_container">
+					<div class="divider">
+						<span>Height Above Ground</span>
+					</div>
+
+					<li><span data-i18n="appearance.heightaboveground_range"></span>: <span id="lblHeightAboveGroundRange"></span> <div id="sldHeightAboveGroundRange"></div>	</li>
+
+					<li>
+						<span>Gradient Scheme:</span>
+						<div id="elevation_gradient_scheme_selection" style="display: flex; padding: 1em 0em">
+						</div>
+					</li>
 				</div>
 
 
@@ -390,6 +405,7 @@ export class PropertiesPanel{
 
 			options.push(
 				"elevation",
+				"heightaboveground",
 				"color",
 				'matcap',
 				'indices',
@@ -461,6 +477,7 @@ export class PropertiesPanel{
 
 				let blockWeights = $('#materials\\.composite_weight_container');
 				let blockElevation = $('#materials\\.elevation_container');
+				let blockHeightAboveGround = $('#materials\\.heightaboveground_container');
 				let blockRGB = $('#materials\\.rgb_container');
 				let blockExtra = $('#materials\\.extra_container');
 				let blockColor = $('#materials\\.color_container');
@@ -473,6 +490,7 @@ export class PropertiesPanel{
 				blockIndex.css('display', 'none');
 				blockIntensity.css('display', 'none');
 				blockElevation.css('display', 'none');
+				blockHeightAboveGround.css('display', 'none');
 				blockRGB.css('display', 'none');
 				blockExtra.css('display', 'none');
 				blockColor.css('display', 'none');
@@ -484,10 +502,13 @@ export class PropertiesPanel{
 				if (selectedValue === 'composite') {
 					blockWeights.css('display', 'block');
 					blockElevation.css('display', 'block');
+					blockHeightAboveGround.css('display', 'block');
 					blockRGB.css('display', 'block');
 					blockIntensity.css('display', 'block');
 				} else if (selectedValue === 'elevation') {
 					blockElevation.css('display', 'block');
+				} else if (selectedValue === 'heightaboveground') {
+					blockHeightAboveGround.css('display', 'block');
 				} else if (selectedValue === 'RGB and Elevation') {
 					blockRGB.css('display', 'block');
 					blockElevation.css('display', 'block');
@@ -700,6 +721,12 @@ export class PropertiesPanel{
 				slide: (event, ui) => {material.weightSourceID = ui.value}
 			});
 
+			panel.find('#sldWeightHeightAboveGround').slider({
+				value: material.weightHeightAboveGround,
+				min: 0, max: 1, step: 0.01,
+				slide: (event, ui) => {material.weightHeightAboveGround = ui.value}
+			});
+
 			panel.find(`#materials\\.color\\.picker`).spectrum({
 				flat: true,
 				showInput: true,
@@ -741,6 +768,23 @@ export class PropertiesPanel{
 				panel.find('#sldHeightRange').slider({min: bMin, max: bMax, values: range});
 			};
 
+			let updateHeightAboveGroundRange = function () {
+				let box = [pointcloud.pcoGeometry.tightBoundingBox, pointcloud.getBoundingBoxWorld()]
+					.find(v => v !== undefined);
+
+				pointcloud.updateMatrixWorld(true);
+				box = Utils.computeTransformedBoundingBox(box, pointcloud.matrixWorld);
+
+				let bWidth = box.max.z - box.min.z;
+				let bMin = box.min.z - 0.2 * bWidth;
+				let bMax = box.max.z + 0.2 * bWidth;
+
+				let range = material.heightAboveGroundRange;
+
+				panel.find('#lblHeightAboveGroundRange').html(`${range[0].toFixed(2)} to ${range[1].toFixed(2)}`);
+				panel.find('#sldHeightAboveGroundRange').slider({min: bMin, max: bMax, values: range});
+			};
+
 			let updateExtraRange = function () {
 
 				let attributeName = material.activeAttributeName;
@@ -775,6 +819,12 @@ export class PropertiesPanel{
 				updateHeightRange();
 				panel.find(`#sldHeightRange`).slider('option', 'min');
 				panel.find(`#sldHeightRange`).slider('option', 'max');
+			}
+
+			{
+				updateHeightAboveGroundRange();
+				panel.find(`#sldHeightAboveGroundRange`).slider('option', 'min');
+				panel.find(`#sldHeightAboveGroundRange`).slider('option', 'max');
 			}
 
 			{
@@ -820,12 +870,14 @@ export class PropertiesPanel{
 				panel.find('#sldRGBBrightness').slider({value: brightness});
 			};
 
+			this.addVolatileListener(material, "material_property_changed", updateHeightAboveGroundRange);
 			this.addVolatileListener(material, "material_property_changed", updateExtraRange);
 			this.addVolatileListener(material, "material_property_changed", updateHeightRange);
 			this.addVolatileListener(material, "material_property_changed", onIntensityChange);
 			this.addVolatileListener(material, "material_property_changed", onRGBChange);
 
 			updateExtraRange();
+			updateHeightAboveGroundRange();
 			updateHeightRange();
 			onIntensityChange();
 			onRGBChange();

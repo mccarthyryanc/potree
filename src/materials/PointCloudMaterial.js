@@ -55,6 +55,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 		this._defaultIntensityRangeChanged = false;
 		this._defaultElevationRangeChanged = false;
+		this._defaultHeightAboveGroundRangeChanged = false;
 
 		{
 			const [width, height] = [256, 1];
@@ -75,6 +76,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			returnNumber: { type: 'f', value: [] },
 			numberOfReturns: { type: 'f', value: [] },
 			pointSourceID: { type: 'f', value: [] },
+			heightAboveGround: { type: 'f', value: [] },
 			indices: { type: 'fv', value: [] }
 		};
 
@@ -97,6 +99,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			octreeSize:			{ type: "f", value: 0 },
 			bbSize:				{ type: "fv", value: [0, 0, 0] },
 			elevationRange:		{ type: "2fv", value: [0, 0] },
+			heightAboveGroundRange:	{ type: "2fv", value: [0, 0] },
 
 			clipBoxCount:		{ type: "f", value: 0 },
 			//clipSphereCount:	{ type: "f", value: 0 },
@@ -116,7 +119,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			diffuse:			{ type: "fv", value: [1, 1, 1] },
 			transition:			{ type: "f", value: 0.5 },
 
-			 intensityRange:		{ type: "fv", value: [Infinity, -Infinity] },
+			intensityRange:		{ type: "fv", value: [Infinity, -Infinity] },
 
 			intensity_gbc: 		{ type: "fv", value: [1, 0, 0]},
 			uRGB_gbc:	 		{ type: "fv", value: [1, 0, 0]},
@@ -132,6 +135,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			wClassification:	{ type: "f", value: 0 },
 			wReturnNumber:		{ type: "f", value: 0 },
 			wSourceID:			{ type: "f", value: 0 },
+			wHeightAboveGround:	{ type: "f", value: 0 },
 			useOrthographicCamera: { type: "b", value: false },
 			elevationGradientRepat: { type: "i", value: ElevationGradientRepeat.CLAMP },
 			clipTask:			{ type: "i", value: 1 },
@@ -733,6 +737,43 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		this.elevationRange = [this.elevationRange[0], value];
 	}
 
+	get heightAboveGroundRange () {
+		return this.uniforms.heightAboveGroundRange.value;
+	}
+
+	set heightAboveGroundRange (value) {
+		let changed = this.uniforms.heightAboveGroundRange.value[0] !== value[0]
+			|| this.uniforms.heightAboveGroundRange.value[1] !== value[1];
+
+		if(changed){
+			this.uniforms.heightAboveGroundRange.value = value;
+
+			this._defaultHeightAboveGroundRangeChanged = true;
+
+			this.dispatchEvent({
+				type: 'material_property_changed',
+				target: this
+			});
+		}
+	}
+
+	get heightAboveGroundMin () {
+		return this.uniforms.heightAboveGroundRange.value[0];
+	}
+
+	set heightAboveGroundMin (value) {
+		this.heightAboveGroundRange = [value, this.heightAboveGroundRange[1]];
+	}
+
+	get heightAboveGroundMax () {
+		return this.uniforms.heightAboveGroundRange.value[1];
+	}
+
+	set heightAboveGroundMax (value) {
+		this.heightAboveGroundRange = [this.heightAboveGroundRange[0], value];
+	}
+
+
 	get transition () {
 		return this.uniforms.transition.value;
 	}
@@ -977,6 +1018,20 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 	set weightElevation (value) {
 		if(this.uniforms.wElevation.value !== value){
 			this.uniforms.wElevation.value = value;
+			this.dispatchEvent({
+				type: 'material_property_changed',
+				target: this
+			});
+		}
+	}
+
+	get weightHeightAboveGround () {
+		return this.uniforms.wHeightAboveGround.value;
+	}
+
+	set weightHeightAboveGround (value) {
+		if(this.uniforms.wHeightAboveGround.value !== value){
+			this.uniforms.wHeightAboveGround.value = value;
 			this.dispatchEvent({
 				type: 'material_property_changed',
 				target: this

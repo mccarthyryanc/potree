@@ -148,6 +148,8 @@ let attributeLocations = {
 	"spacing": {name: "spacing", location: 9},
 	"gps-time":  {name: "gpsTime", location: 10},
 	"aExtra":  {name: "aExtra", location: 11},
+	"heightAboveGround":  {name: "heightAboveGround", location: 12},
+	"height above ground":  {name: "heightAboveGround", location: 12},
 };
 
 class Shader {
@@ -1268,6 +1270,7 @@ export class Renderer {
 
 			shader.setUniform2f("elevationRange", material.elevationRange);
 			shader.setUniform2f("intensityRange", material.intensityRange);
+			shader.setUniform2f("heightAboveGroundRange", material.heightAboveGroundRange);
 
 
 			shader.setUniform3f("uIntensity_gbc", [
@@ -1286,6 +1289,7 @@ export class Renderer {
 			shader.setUniform1f("wRGB", material.weightRGB);
 			shader.setUniform1f("wIntensity", material.weightIntensity);
 			shader.setUniform1f("wElevation", material.weightElevation);
+			shader.setUniform1f("wHeightAboveGround", material.weightHeightAboveGround);
 			shader.setUniform1f("wClassification", material.weightClassification);
 			shader.setUniform1f("wReturnNumber", material.weightReturnNumber);
 			shader.setUniform1f("wSourceID", material.weightSourceID);
