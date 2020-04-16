@@ -244,7 +244,7 @@ export class PropertiesPanel{
 
 					<li>
 						<span>Gradient Scheme:</span>
-						<div id="elevation_gradient_scheme_selection" style="display: flex; padding: 1em 0em">
+						<div id="heightaboveground_gradient_scheme_selection" style="display: flex; padding: 1em 0em">
 						</div>
 					</li>
 				</div>
@@ -555,6 +555,30 @@ export class PropertiesPanel{
 			const schemes = Object.keys(Potree.Gradients).map(name => ({name: name, values: Gradients[name]}));
 
 			let elSchemeContainer = panel.find("#elevation_gradient_scheme_selection");
+
+			for(let scheme of schemes){
+				let elScheme = $(`
+					<span style="flex-grow: 1;">
+					</span>
+				`);
+
+				const svg = Potree.Utils.createSvgGradient(scheme.values);
+				svg.setAttributeNS(null, "class", `button-icon`);
+
+				elScheme.append($(svg));
+
+				elScheme.click( () => {
+					material.gradient = Gradients[scheme.name];
+				});
+
+				elSchemeContainer.append(elScheme);
+			}
+		}
+
+		{
+			const schemes = Object.keys(Potree.Gradients).map(name => ({name: name, values: Gradients[name]}));
+
+			let elSchemeContainer = panel.find("#heightaboveground_gradient_scheme_selection");
 
 			for(let scheme of schemes){
 				let elScheme = $(`
