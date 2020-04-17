@@ -86,6 +86,9 @@ PointAttribute.SPACING = new PointAttribute(
 PointAttribute.GPS_TIME = new PointAttribute(
 	"GPS_TIME", PointAttributeTypes.DATA_TYPE_DOUBLE, 1);
 
+PointAttribute.HEIGHT_ABOVE_GROUND = new PointAttribute(
+	"HEIGHT_ABOVE_GROUND", PointAttributeTypes.DATA_TYPE_DOUBLE, 1);
+
 export {PointAttribute};
 
 export class PointAttributes{
