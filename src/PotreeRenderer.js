@@ -148,7 +148,7 @@ let attributeLocations = {
 	"spacing": {name: "spacing", location: 9},
 	"gps-time":  {name: "gpsTime", location: 10},
 	"aExtra":  {name: "aExtra", location: 11},
-	"heightAboveGround":  {name: "heightAboveGround", location: 12},
+	// "heightAboveGround":  {name: "heightAboveGround", location: 12},
 	"height above ground":  {name: "heightAboveGround", location: 12},
 };
 

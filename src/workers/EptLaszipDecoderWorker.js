@@ -5,6 +5,7 @@ function readUsingDataView(event) {
 	let numPoints = event.data.numPoints;
 	let pointSize = event.data.pointSize;
 	let pointFormat = event.data.pointFormatID;
+	let extraBytes = event.data.extraBytes;
 
 	// gps time byte offsets from LAS specification
 	let gpsOffsets = [null, 20, null, 20, 20, 20, 22, 22, 22, 22, 22] 
@@ -40,6 +41,8 @@ function readUsingDataView(event) {
 	let psBuff = new ArrayBuffer(numPoints * 2);
 	let gpsBuff64 = new ArrayBuffer(numPoints * 8);
 	let gpsBuff32 = new ArrayBuffer(numPoints * 4);
+	let hagBuff64 = new ArrayBuffer(numPoints * 8);
+	let hagBuff32 = new ArrayBuffer(numPoints * 4);
 
 	let positions = new Float32Array(pBuff);
 	let colors = new Uint8Array(cBuff);
@@ -50,6 +53,8 @@ function readUsingDataView(event) {
 	let pointSourceIDs = new Uint16Array(psBuff);
 	let gpsTime64 = new Float64Array(gpsBuff64)
 	let gpsTime32 = new Float32Array(gpsBuff32)
+	let hags64 = new Float64Array(hagBuff64);
+	let hags32 = new Float32Array(hagBuff32);
 
 	// Point format 3 contains an 8-byte GpsTime before RGB values, so make
 	// sure we have the correct color offset.
@@ -68,6 +73,17 @@ function readUsingDataView(event) {
 			if (r > 255 || g > 255 || b > 255) twoByteColor = true;
 		}
 	}
+
+	// console.log('pointSize: ', pointSize);
+	// console.log('extraBytes: ', extraBytes);
+
+	// If extra-bytes is at least 8, assume the last 8 bytes are a double
+	// representing height above ground... This is not a great way to do this :-(
+	let hasHag = false;
+	if (extraBytes >= 8) {
+		hasHag = true;
+	};
+
 
 	for (let i = 0; i < numPoints; i++) {
 		// POSITION
@@ -115,6 +131,12 @@ function readUsingDataView(event) {
 		let pointSourceID = sourceView.getUint16(i * pointSize + 18, true);
 		pointSourceIDs[i] = pointSourceID;
 
+		// GPS TIME
+		if (pointFormat > 0) {
+			let gpstime = sourceView.getFloat64(i * pointSize + 20, true);
+			gpsTime64[i] = gpstime;
+		}
+
 		// COLOR, if available
 		if (hasColor) {
 			let r = sourceView.getUint16(i * pointSize + co, true)
@@ -132,6 +154,12 @@ function readUsingDataView(event) {
 			colors[4 * i + 2] = b;
 			colors[4 * i + 3] = 255;
 		}
+
+		// HAG, if available
+		if (hasHag) {
+			let hag = sourceView.getFloat64(i * pointSize + 28 + 1, true);
+			hags64[i] = hag;
+		}
 	}
 
 	let min = Infinity
@@ -143,7 +171,9 @@ function readUsingDataView(event) {
 	}
 
 	for (let i = 0; i < numPoints; i++) {
-		gpsTime32[i] = gpsTime64[i] = min
+		// gpsTime32[i] = gpsTime64[i] = min
+		gpsTime32[i] = gpsTime64[i];
+		hags32[i] = hags64[i];
 	}
 
 	let indices = new ArrayBuffer(numPoints * 4);
@@ -173,6 +203,7 @@ function readUsingDataView(event) {
 		returnNumber: rnBuff,
 		numberOfReturns: nrBuff,
 		pointSourceID: psBuff,
+		heightAboveGround: hagBuff32,
 		tightBoundingBox: tightBoundingBox,
 		indices: indices,
 		gpsTime: gpsBuff32,
@@ -187,6 +218,7 @@ function readUsingDataView(event) {
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceID,
+		message.heightAboveGround,
 		message.indices,
 		message.gpsTime
 	];

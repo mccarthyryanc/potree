@@ -119,8 +119,8 @@ function parseEpt(event) {
 	}
 
 	if (dimensions['HeightAboveGround']) {
-		heightAboveGroundBuffer = new ArrayBuffer(numPoints * 4);
-		heightAboveGround = new Float32Array(heightAboveGroundBuffer);
+		heightAboveGroundBuffer = new ArrayBuffer(numPoints * 8);
+		heightAboveGround = new Float64Array(heightAboveGroundBuffer);
 		heightAboveGroundExtractor = getExtractor('HeightAboveGround');
 	}
 

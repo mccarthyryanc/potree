@@ -120,6 +120,7 @@ export class EptLazBatcher {
 			let pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			let indices = new Uint8Array(e.data.indices);
 			let gpsTime = new Float32Array(e.data.gpsTime);
+			let heightAboveGrounds = new Float32Array(e.data.heightAboveGround);
 
 			g.addAttribute('position',
 					new THREE.BufferAttribute(positions, 3));
@@ -140,6 +141,9 @@ export class EptLazBatcher {
 			g.addAttribute('gpsTime',
 					new THREE.BufferAttribute(gpsTime, 1));
 			this.node.gpsTime = e.data.gpsMeta;
+
+			g.addAttribute('height above ground',
+					new THREE.BufferAttribute(heightAboveGrounds, 1));
 
 			g.attributes.indices.normalized = true;
 
@@ -162,6 +166,7 @@ export class EptLazBatcher {
 			numPoints: las.pointsCount,
 			pointSize: las.pointSize,
 			pointFormatID: las.pointsFormatId,
+			extraBytes: las.extraBytes,
 			scale: las.scale,
 			offset: las.offset,
 			mins: las.mins,

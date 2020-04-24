@@ -77,6 +77,14 @@ export class PointCloudEptGeometry {
 			attributes.add(new PointAttribute("return number", PointAttributeTypes.DATA_TYPE_UINT8, 1));
 			attributes.add(new PointAttribute("source id", PointAttributeTypes.DATA_TYPE_UINT16, 1));
 
+			try {
+				let hag = U.findDim(schema, 'HeightAboveGround');
+				attributes.add(new PointAttribute("height above ground", PointAttributeTypes.DATA_TYPE_DOUBLE, 1));
+			}
+			catch(error) {
+				console.log('HeightAboveGround not in schema so not adding it.');
+			}
+
 			this.pointAttributes = attributes;
 		}
 
